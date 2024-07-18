@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
 import { getShowById } from "../calls/shows";
-import { GetCurrentUser } from "../calls/users";
 import { useNavigate, useParams } from "react-router-dom";
 import { message, Card, Row, Col, Button } from "antd";
 import moment from "moment";
@@ -16,27 +15,6 @@ const BookShow = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const params = useParams();
   const navigate = useNavigate();
-
-  const checkUser = async () => {
-    try {
-      const response = await GetCurrentUser();
-      if (response.success) {
-        const user = response.data;
-        if (user.role === "admin" || user.role === "partner") {
-          message.error("You are not authorized to view this page");
-          navigate("/"+user.role);
-        }
-      }
-    } catch (error) {
-      message.error(error.message);
-      navigate("/login");
-    }
-  }
-
-  useEffect(() => {
-    checkUser();
-  }, []);
-
   const getData = async () => {
     try {
       dispatch(showLoading());
@@ -61,14 +39,15 @@ const BookShow = () => {
     let rows = Math.ceil(totalSeats / columns);
 
     return (
-      <div className="d-flex flex-column align-items-center">
+      <div className="d-flex flex-column justify-content-center align-items-center">
         <div className="w-100 max-width-600 mx-auto mb-25px">
           <p className="text-center mb-10px">
             Screen this side, you will be watching in this direction
           </p>
           <div className="screen-div"></div>
         </div>
-        <ul className="seat-ul justify-content-center">
+        <div className="w-100 max-width-600 mx-auto mb-25px">
+        <ul className="seat-ul w-full justify-content-center">
           {Array.from(Array(rows).keys()).map((row) => {
             return Array.from(Array(columns).keys()).map((column) => {
               let seatNumber = row * columns + column + 1;
@@ -109,14 +88,15 @@ const BookShow = () => {
                   <li>
                     <button
                       onClick={() => {
-                        if (selectedSeats.includes(seatNumber)) {
-                          setSelectedSeats(
-                            selectedSeats.filter(
-                              (curSeatNumber) => curSeatNumber !== seatNumber
-                            )
-                          );
+                        if (!show.bookedSeats.includes(seatNumber)) {
+                          if (selectedSeats.includes(seatNumber)) {
+                            setSelectedSeats(selectedSeats.filter((curSeatNumber) => curSeatNumber !== seatNumber));
+                          } else {
+                            setSelectedSeats([...selectedSeats, seatNumber]);
+                          }
                         } else {
-                          setSelectedSeats([...selectedSeats, seatNumber]);
+                          // Optionally, show a message that the seat is booked and cannot be selected.
+                          console.log("This seat is already booked.");
                         }
                       }}
                       className={seatClass}
@@ -128,6 +108,7 @@ const BookShow = () => {
             });
           })}
         </ul>
+        </div>
 
         <div className="d-flex bottom-card justify-content-between w-100 max-width-600 mx-auto mb-25px mt-3">
           <div className="flex-1">

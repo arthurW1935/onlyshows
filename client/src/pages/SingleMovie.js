@@ -25,6 +25,7 @@ const SingleMovie = () => {
   const checkUser = async () => {
     try {
       const response = await GetCurrentUser();
+      console.log(response);
       if (response.success) {
         const user = response.data;
         if (user.role === "admin" || user.role === "partner") {
@@ -32,10 +33,10 @@ const SingleMovie = () => {
           navigate("/"+user.role);
         }
       }
-    } catch (error) {
-      message.error(error.message);
-      navigate("/login");
-    }
+      } catch (error) {
+        message.error(error.message);
+        navigate("/login");
+      }
   }
 
   useEffect(() => {

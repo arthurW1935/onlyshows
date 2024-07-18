@@ -20,8 +20,12 @@ function ProtectedRoute({ children }) {
   const navigate = useNavigate();
 
   const navItems = [
-    {
-      label: "Home",
+    user && user.role === "user" && {
+      label: (
+        <Link to="/" style={{ color: "white" }}>
+          Home
+        </Link>
+      ),
       icon: <HomeOutlined />,
     },
 
@@ -76,6 +80,8 @@ function ProtectedRoute({ children }) {
     } catch (error) {
       dispatch(setUser(null));
       message.error(error.message);
+      dispatch(hideLoading());
+      navigate("/login");
     }
   };
 
